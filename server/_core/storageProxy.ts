@@ -2,7 +2,11 @@ import type { Express } from "express";
 import { ENV } from "./env";
 
 export function registerStorageProxy(app: Express) {
-  app.get("/manus-storage/*", async (req, res) => {
+  // Registered on both paths: "/manus-storage/*" is what the app is mounted
+  // at when self-hosted (server/_core/index.ts), while "/api/manus-storage/*"
+  // is the real path of the Vercel serverless function (api/manus-storage/[...path].ts),
+  // which vercel.json rewrites the public "/manus-storage/*" URL to.
+  app.get(["/manus-storage/*", "/api/manus-storage/*"], async (req, res) => {
     const key = (req.params as Record<string, string>)[0];
     if (!key) {
       res.status(400).send("Missing storage key");
